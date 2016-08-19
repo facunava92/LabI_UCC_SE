@@ -168,7 +168,7 @@ void RGB_PWM(uint8_t led, uint8_t value) {
 
 uint8_t BSP_GetBrightness(void) {
 	HAL_ADC_Start(&ADC_HandleStruct);
-	return (uint8_t) (HAL_ADC_GetValue(&ADC_HandleStruct) * 100 / 4095);
+	return (HAL_ADC_GetValue(&ADC_HandleStruct) * 100 / 4095);
 }
 
 //TIMER INTERRUPT

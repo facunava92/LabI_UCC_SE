@@ -13,16 +13,16 @@
 #define RGB_PORT 	GPIOB
 #define ADC_PORT 	GPIOC
 
-#define RGB_ROJO	 	(uint16_t)0x0001U
-#define RGB_VERDE	 	(uint16_t)0x0002U
-#define RGB_AZUL	 	(uint16_t)0x0010U
-#define RGB_LEDS		RGB_ROJO | RGB_VERDE | RGB_AZUL
+
+enum{
+	RGB_ROJO = 0,
+	RGB_VERDE,
+	RGB_AZUL
+}leds;
 
 
 	void BSP_Init(void);
 
-	void RGB_ON(uint16_t led);
-	void RGB_OFF(uint16_t led);
 	void RGB_PWM(uint8_t led, uint8_t value);
 	uint8_t BSP_GetBrightness(void);
 
