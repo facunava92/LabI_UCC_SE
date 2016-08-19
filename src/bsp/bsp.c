@@ -26,7 +26,7 @@ void CLOCK_CONTROL_REGISTER_Config(void)
 	__PWR_CLK_ENABLE();
 	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-	// Configuracion de CLOCK a 168 MHZ
+	// Configuracion de CLOCK a 168 MHz
 
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
 	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -65,15 +65,16 @@ void TIMER_Init(void)
 
 void PWM_Timer(void)
 {
+        // Frecuencia a 50 Hz (20 ms)
 	__TIM3_CLK_ENABLE();
 	TIM_MasterConfigTypeDef TIM_MasterConfig;
 	TIM_OC_InitTypeDef TIM_OC_Init;
 
 	TIM3_Handle.Instance = TIM3;
-	TIM3_Handle.Init.Prescaler = 84 - 1;
+	TIM3_Handle.Init.Prescaler = 840 - 1;
 
 	TIM3_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
-	TIM3_Handle.Init.Period = 1500;
+	TIM3_Handle.Init.Period = 1000;
 	TIM3_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
 	HAL_TIM_PWM_Init(&TIM3_Handle);
 
@@ -177,4 +178,3 @@ void TIM2_IRQHandler(void) {
 	__HAL_TIM_CLEAR_FLAG(&TIM2_Handle, TIM_FLAG_UPDATE);
 	delay_ms();
 }
-
