@@ -11,11 +11,13 @@
 
 extern void delay_ms(void);
 
-uint32_t* const leds_pwm[] = { &TIM3->CCR1, &TIM3->CCR2, &TIM3->CCR3};
+uint32_t* const leds_pwm[] = { &TIM3->CCR3, &TIM3->CCR4, &TIM3->CCR1};
 
 TIM_HandleTypeDef TIM2_Handle;
 TIM_HandleTypeDef TIM3_Handle;
+ADC_HandleTypeDef ADC_HandleStruct;
 
+/////// INICIALIZADORES
 void CLOCK_CONTROL_REGISTER_Config(void)
 {
 	RCC_OscInitTypeDef RCC_OscInitStruct;
@@ -42,30 +44,6 @@ void CLOCK_CONTROL_REGISTER_Config(void)
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
-}
-
-void ADC_Config(void)
-{
-	//CONFIGURACION DEL PIN DE ADC
-
-	__GPIOC_CLK_ENABLE();
-
-	GPIO_InitTypeDef GPIOC_Init;
-
-	GPIOC_Init.Mode = GPIO_MODE_ANALOG;
-	GPIOC_Init.Pull = GPIO_NOPULL;
-	GPIOC_Init.Speed = GPIO_SPEED_FAST;
-	GPIOC_Init.Pin = GPIO_PIN_2;
-	HAL_GPIO_Init(ADC_PORT, &GPIOC_Init);
-
-//CONFIGURACION ADC
-
-
-
-//SETEO DE LAS PROPIEDADES DEL CONFIG TYPEDEF
-
-	 ADC_InitTypeDef ADC_Init;
-	 ADC_Init.Resolution = ;
 }
 
 void TIMER_Init(void)
@@ -103,53 +81,100 @@ void PWM_Timer(void)
 	TIM_MasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
 	HAL_TIMEx_MasterConfigSynchronization(&TIM3_Handle, &TIM_MasterConfig);
 
-	TIM_OC_Init.OCMode = TIM_OCMODE_PWM2;
+	TIM_OC_Init.OCMode = TIM_OCMODE_PWM1;
 	TIM_OC_Init.Pulse = 0;
 	TIM_OC_Init.OCPolarity = TIM_OCPOLARITY_LOW;
 	TIM_OC_Init.OCFastMode = TIM_OCFAST_ENABLE;
 
 	HAL_TIM_PWM_ConfigChannel(&TIM3_Handle, &TIM_OC_Init, TIM_CHANNEL_1);
-	HAL_TIM_PWM_ConfigChannel(&TIM3_Handle, &TIM_OC_Init, TIM_CHANNEL_2);
 	HAL_TIM_PWM_ConfigChannel(&TIM3_Handle, &TIM_OC_Init, TIM_CHANNEL_3);
+	HAL_TIM_PWM_ConfigChannel(&TIM3_Handle, &TIM_OC_Init, TIM_CHANNEL_4);
 
 	HAL_TIM_PWM_Start(&TIM3_Handle, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&TIM3_Handle, TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&TIM3_Handle, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&TIM3_Handle, TIM_CHANNEL_4);
 }
 
 void GPIO_RGB_Config(void)
 {
 	__GPIOB_CLK_ENABLE();
 
-	GPIO_InitTypeDef GPIOB_Init;
+	GPIO_InitTypeDef GPIO_Init;
 
-	GPIOB_Init.Mode = GPIO_MODE_AF_PP;
-	GPIOB_Init.Pull = GPIO_NOPULL;
-	GPIOB_Init.Speed = GPIO_SPEED_FAST;
-	GPIOB_Init.Alternate = GPIO_AF2_TIM3 ;
-	GPIOB_Init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4;
-	HAL_GPIO_Init(RGB_PORT, &GPIOB_Init);
+	GPIO_Init.Mode = GPIO_MODE_AF_PP;
+	GPIO_Init.Pull = GPIO_NOPULL;
+	GPIO_Init.Speed = GPIO_SPEED_FAST;
+	GPIO_Init.Alternate = GPIO_AF2_TIM3;
+	GPIO_Init.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_4;
+	HAL_GPIO_Init(RGB_PORT, &GPIO_Init);
 }
 
+void ADC_Init(void) {
 
+	__GPIOC_CLK_ENABLE();
 
-void RGB_PWM(uint16_t led) {
-	HAL_GPIO_WritePin(RGB_PORT, led, GPIO_PIN_RESET );
+	GPIO_InitTypeDef GPIO_InitStruct;
+
+	GPIO_InitStruct.Pin = GPIO_PIN_2;
+	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
+	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+	__ADC1_CLK_ENABLE();
+
+	ADC_ChannelConfTypeDef ChannelConfStruct;
+
+	ADC_HandleStruct.Instance = ADC1;
+	ADC_HandleStruct.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+	ADC_HandleStruct.Init.Resolution = ADC_RESOLUTION_12B;
+	ADC_HandleStruct.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	ADC_HandleStruct.Init.ScanConvMode = DISABLE;
+	ADC_HandleStruct.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+	ADC_HandleStruct.Init.ContinuousConvMode = DISABLE;
+	ADC_HandleStruct.Init.NbrOfConversion = 1;
+	ADC_HandleStruct.Init.DiscontinuousConvMode = DISABLE;
+	ADC_HandleStruct.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	ADC_HandleStruct.Init.DMAContinuousRequests = DISABLE;
+	ADC_HandleStruct.Init.NbrOfDiscConversion = 0;
+	ADC_HandleStruct.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+	ADC_HandleStruct.Init.EOCSelection = DISABLE;
+
+	ChannelConfStruct.Channel = ADC_CHANNEL_12;
+	ChannelConfStruct.Offset = 0;
+	ChannelConfStruct.Rank = 1;
+	ChannelConfStruct.SamplingTime = ADC_SAMPLETIME_15CYCLES;
+
+	HAL_ADC_Init(&ADC_HandleStruct);
+	HAL_ADC_ConfigChannel(&ADC_HandleStruct, &ChannelConfStruct);
+	HAL_ADC_Start(&ADC_HandleStruct);
+
 }
 
+////////BSP_INIT
+void BSP_Init(void){
+	CLOCK_CONTROL_REGISTER_Config();
+	TIMER_Init();
+	GPIO_RGB_Config();
+	PWM_Timer();
+	ADC_Init();
+}
 
+///////FUNCIONES APP
+
+void RGB_PWM(uint8_t led, uint8_t value) {
+	*leds_pwm[led] = 1000 * value / 100;
+}
+
+uint8_t BSP_GetBrightness(void) {
+	HAL_ADC_Start(&ADC_HandleStruct);
+	return (uint8_t) (HAL_ADC_GetValue(&ADC_HandleStruct) * 100 / 4095);
+}
+
+//TIMER INTERRUPT
 void TIM2_IRQHandler(void) {
 
 	__HAL_TIM_CLEAR_FLAG(&TIM2_Handle, TIM_FLAG_UPDATE);
 	delay_ms();
 }
-
-void BSP_Init(void)
-{
-	CLOCK_CONTROL_REGISTER_Config();
-	TIMER_Init();
-	GPIO_Config();
-}
-
-
 
