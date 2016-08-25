@@ -9,8 +9,6 @@
 #include "stm32f4xx.h"
 #include "stm32f4_discovery.h"
 
-extern void delay_ms(void);
-
 uint32_t* const leds_pwm[] = { &TIM3->CCR3, &TIM3->CCR4, &TIM3->CCR1};
 
 TIM_HandleTypeDef TIM2_Handle;
@@ -46,22 +44,6 @@ void CLOCK_CONTROL_REGISTER_Config(void)
 	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 }
 
-void TIMER_Init(void)
-{
-	__TIM2_CLK_ENABLE();
-
-	TIM2_Handle.Instance = TIM2;
-	TIM2_Handle.Init.Period = 1000 - 1;
-	TIM2_Handle.Init.Prescaler = 84 - 1;
-	TIM2_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	TIM2_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
-
-	HAL_TIM_Base_Init(&TIM2_Handle);
-	HAL_TIM_Base_Start_IT(&TIM2_Handle);
-
-	HAL_NVIC_SetPriority(TIM2_IRQn, 0, 1);
-	HAL_NVIC_EnableIRQ(TIM2_IRQn);
-}
 
 void PWM_Timer(void)
 {
@@ -126,13 +108,13 @@ void ADC_Init(void) {
 	ADC_ChannelConfTypeDef ChannelConfStruct;
 
 	ADC_HandleStruct.Instance = ADC1;
-	ADC_HandleStruct.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+	ADC_HandleStruct.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
 	ADC_HandleStruct.Init.Resolution = ADC_RESOLUTION_12B;
 	ADC_HandleStruct.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	ADC_HandleStruct.Init.ScanConvMode = DISABLE;
-	ADC_HandleStruct.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-	ADC_HandleStruct.Init.ContinuousConvMode = DISABLE;
-	ADC_HandleStruct.Init.NbrOfConversion = 1;
+	ADC_HandleStruct.Init.EOCSelection = ADC_EOC_SEQ_CONV;
+	ADC_HandleStruct.Init.ContinuousConvMode = ENABLE;
+	ADC_HandleStruct.Init.NbrOfConversion = 100;
 	ADC_HandleStruct.Init.DiscontinuousConvMode = DISABLE;
 	ADC_HandleStruct.Init.ExternalTrigConv = ADC_SOFTWARE_START;
 	ADC_HandleStruct.Init.DMAContinuousRequests = DISABLE;
@@ -154,7 +136,6 @@ void ADC_Init(void) {
 ////////BSP_INIT
 void BSP_Init(void){
 	CLOCK_CONTROL_REGISTER_Config();
-	TIMER_Init();
 	GPIO_RGB_Config();
 	PWM_Timer();
 	ADC_Init();
@@ -166,15 +147,9 @@ void RGB_PWM(uint8_t led, uint8_t value) {
 	*leds_pwm[led] = 1000 * value / 100;
 }
 
-uint8_t BSP_GetBrightness(void) {
+float BSP_GetBrightness(void) {
 	HAL_ADC_Start(&ADC_HandleStruct);
-	return (HAL_ADC_GetValue(&ADC_HandleStruct) * 100 / 4095);
+	return (HAL_ADC_GetValue(&ADC_HandleStruct) * (float)100 / (float)4095);
 }
 
-//TIMER INTERRUPT
-void TIM2_IRQHandler(void) {
-
-	__HAL_TIM_CLEAR_FLAG(&TIM2_Handle, TIM_FLAG_UPDATE);
-	delay_ms();
-}
 

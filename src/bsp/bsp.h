@@ -24,7 +24,7 @@ enum{
 	void BSP_Init(void);
 
 	void RGB_PWM(uint8_t led, uint8_t value);
-	uint8_t BSP_GetBrightness(void);
+	float BSP_GetBrightness(void);
 
 #endif /* BSP_BSP_H_ */
 
