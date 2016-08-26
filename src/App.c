@@ -9,12 +9,10 @@
 */
 #include "bsp/bsp.h"
 
-uint16_t counter = 20;
 uint32_t adc_pot = 0;
 uint32_t value_G, value_R, value_B=0;
-uint32_t RES=10;
+uint32_t RES=100000;
 
-void delay_ms(void);
 void RGB_GREEN(void)
 {
 	if(adc_pot <= 12*RES)
@@ -22,7 +20,7 @@ void RGB_GREEN(void)
 	else if (adc_pot <= 42*RES)
 		value_G = 100;
 	else if (adc_pot <= 58*RES)
-		value_G = ((1160)/3) - ((20*adc_pot)/(3*RES));
+		value_G = (725/2) - ((25*adc_pot)/(4*RES));
 	else
 		value_G=0;
 
@@ -33,7 +31,7 @@ void RGB_RED(void)
 	if(adc_pot <= 12*RES)
 		value_R = 100;
 	else if (adc_pot <= 25*RES)
-		value_R = (625/3) - ((25*adc_pot)/(3*RES));
+		value_R = (2500/13) - ((100*adc_pot)/(13*RES));
 	else if (adc_pot <= 57*RES)
 		value_R=0;
 	else if (adc_pot <= 78*RES)
@@ -48,11 +46,11 @@ void RGB_BLUE(void)
 	if (adc_pot <= 25*RES)
 		value_B = 0;
 	else if (adc_pot <= 42*RES)
-		value_B = ((((25*adc_pot/4))-(325*RES/2))/RES);
+		value_B = ((100*adc_pot)/(17*RES))-(2500/17);
 	else if (adc_pot <= 78*RES)
 		value_B = 100;
 	else
-		value_B = ((((10000*RES)/21)-((100*adc_pot)/21))/RES);
+		value_B =(5000/11)-((50*adc_pot)/(11*RES));
 
 	RGB_PWM(RGB_AZUL,value_B);
 }

@@ -153,13 +153,3 @@ float BSP_GetBrightness(void) {
 	return (HAL_ADC_GetValue(&ADC_HandleStruct) * (float)100 / (float)4095);
 }
 
-<<<<<<< HEAD
-
-=======
-//TIMER INTERRUPT
-void TIM2_IRQHandler(void) {
-
-	__HAL_TIM_CLEAR_FLAG(&TIM2_Handle, TIM_FLAG_UPDATE);
-	delay_ms();
-}
->>>>>>> 67eeb94cea45980f8870bb89c0763609807f15f2
