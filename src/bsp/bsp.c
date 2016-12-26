@@ -11,8 +11,6 @@
 
 uint32_t* const leds_pwm[] = { &TIM3->CCR3, &TIM3->CCR4, &TIM3->CCR1};
 
-TIM_HandleTypeDef TIM2_Handle;
-TIM_HandleTypeDef TIM3_Handle;
 ADC_HandleTypeDef ADC_HandleStruct;
 
 /////// INICIALIZADORES
@@ -44,13 +42,13 @@ void CLOCK_CONTROL_REGISTER_Config(void)
 	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 }
 
-
 void PWM_Timer(void)
 {
         // Frecuencia a 50 Hz (20 ms)
 	__TIM3_CLK_ENABLE();
 	TIM_MasterConfigTypeDef TIM_MasterConfig;
 	TIM_OC_InitTypeDef TIM_OC_Init;
+	TIM_HandleTypeDef TIM3_Handle;
 
 	TIM3_Handle.Instance = TIM3;
 	TIM3_Handle.Init.Prescaler = 840 - 1;

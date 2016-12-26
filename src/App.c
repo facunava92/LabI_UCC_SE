@@ -11,7 +11,7 @@
 
 uint32_t adc_pot = 0;
 uint32_t value_G, value_R, value_B=0;
-uint32_t RES=100000;
+uint32_t RES=1000;
 
 void RGB_GREEN(void)
 {
